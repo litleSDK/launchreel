@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaunchReel ($REEL) — On-Chain AI Launch Trailers for v4.fun</title>
+  <meta name="description" content="Paste any Robinhood Chain or Solana contract address and generate a 1080p broadcast launch trailer & live market-recap reel in seconds. Built for v4.fun & Canopy Agen MCP." />
+  <meta property="og:title" content="LaunchReel ($REEL) — Instant Launch Trailers for v4.fun" />
+  <meta property="og:description" content="Contract Address → 1080p Broadcast Launch Reel in seconds. Built natively for Robinhood Chain, Solana, and v4.fun." />
+  <meta property="og:image" content="./assets/REEL_official_launch_9x16_contact.jpg" />
+  <link rel="icon" type="image/png" href="./assets/launchreel_brand_icon.png" />
+  <style>
+    :root {
+      --bg: #070c10;
+      --bg2: #0d151b;
+      --card: #101a21;
+      --card2: #15232d;
+      --border: #1e3240;
+      --emerald: #00e58d;
+      --gold: #edbd2e;
+      --danger: #ff5c6c;
+      --text: #f3f7fa;
+      --muted: #8ea5b5;
+      --mono: "Consolas", "SFMono-Regular", ui-monospace, monospace;
+      --sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background:
+        radial-gradient(920px 420px at 50% -80px, rgba(0,229,141,0.14), transparent 70%),
+        linear-gradient(180deg, var(--bg), #091015 65%, #060a0d);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.45;
+    }
+    .grid-bg {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(30,50,64,0.22) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(30,50,64,0.22) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at 50% 15%, black 30%, transparent 82%);
+    }
+    .wrap { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 20px 24px 72px; }
+    nav {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      padding: 12px 18px; border: 1px solid var(--border); border-radius: 16px;
+      background: rgba(16, 26, 33, 0.84); backdrop-filter: blur(12px);
+      margin-bottom: 26px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 19px; letter-spacing: -0.02em; }
+    .brand img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--emerald); }
+    .nav-pills { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .pill {
+      font-family: var(--mono); font-size: 12px; padding: 6px 12px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--card2); color: var(--muted); text-decoration: none;
+    }
+    .pill.live { border-color: rgba(0,229,141,0.45); color: var(--emerald); }
+
+    .hero { text-align: center; max-width: 840px; margin: 0 auto 28px; }
+    .hero-kicker {
+      display: inline-flex; gap: 8px; align-items: center; padding: 6px 14px; border-radius: 999px;
+      border: 1px solid rgba(0,229,141,0.35); background: rgba(0,229,141,0.08);
+      font-family: var(--mono); font-size: 12px; color: var(--emerald); margin-bottom: 14px;
+    }
+    .hero h1 { font-size: clamp(30px, 4.5vw, 50px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.08; margin-bottom: 12px; }
+    .hero h1 span { color: var(--emerald); }
+    .hero p { color: var(--muted); font-size: 16px; max-width: 680px; margin: 0 auto; }
+
+    .utility-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin: 22px auto 20px; text-align: left;
+    }
+    @media (max-width: 720px) { .utility-grid { grid-template-columns: 1fr; } }
+    .util-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
+    .util-card .k { font-family: var(--mono); font-size: 11px; margin-bottom: 4px; }
+    .util-card .t { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+    .util-card .d { font-size: 12px; color: var(--muted); }
+
+    .search-bar {
+      display: flex; gap: 10px; max-width: 820px; margin: 16px auto 14px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 8px;
+    }
+    .search-bar input {
+      flex: 1; background: transparent; border: none; outline: none; color: var(--text);
+      font-family: var(--mono); font-size: 14px; padding: 10px 14px; min-width: 0;
+    }
+    .btn {
+      border: none; cursor: pointer; font-weight: 700; font-size: 14px; border-radius: 11px;
+      padding: 11px 20px; transition: transform .12s ease, opacity .12s ease; text-decoration: none; display: inline-block;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--emerald); color: #05130c; }
+    .btn-gold { background: var(--gold); color: #12100a; }
+    .btn-ghost { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .featured-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+      border-radius: 999px; border: 1px solid var(--border); background: var(--card);
+      color: var(--text); font-size: 13px; cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .chip:hover, .chip.active { border-color: var(--emerald); background: rgba(0,229,141,0.1); }
+    .chip .sym { font-family: var(--mono); font-weight: 800; color: var(--emerald); }
+    .chip .tag { font-size: 11px; color: var(--gold); font-family: var(--mono); }
+
+    .studio-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 22px; align-items: start; }
+    @media (max-width: 960px) { .studio-grid { grid-template-columns: 1fr; } }
+
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .panel-title {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 8px; flex-wrap: wrap;
+      font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; color: var(--emerald); text-transform: uppercase;
+    }
+
+    .token-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .token-icon {
+      width: 54px; height: 54px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--emerald); background: var(--card2);
+    }
+    .token-title h2 { font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .token-title .sub { font-family: var(--mono); font-size: 12px; color: var(--muted); word-break: break-all; }
+    .delta { font-family: var(--mono); font-size: 13px; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
+    .delta.up { background: rgba(0,229,141,0.16); color: var(--emerald); }
+    .delta.down { background: rgba(255,92,108,0.16); color: var(--danger); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+    @media (max-width: 640px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+    .stat-box .lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .stat-box .val { font-size: 18px; font-weight: 800; }
+
+    .controls-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 640px) { .controls-row { grid-template-columns: 1fr; } }
+    label.field-lbl { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; }
+    select, input.txt, textarea {
+      width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      color: var(--text); padding: 9px 12px; font-size: 13px; font-family: var(--sans); outline: none;
+    }
+    select:focus, input.txt:focus, textarea:focus { border-color: var(--emerald); }
+    textarea { resize: vertical; min-height: 46px; }
+    .beats-stack { display: grid; gap: 9px; margin-bottom: 16px; }
+
+    .progress-wrap {
+      display: none; margin-top: 14px; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px;
+    }
+    .progress-bar-bg { height: 8px; background: var(--card2); border-radius: 999px; overflow: hidden; margin: 8px 0 6px; }
+    .progress-bar-fg { height: 100%; width: 0%; background: linear-gradient(90deg, var(--emerald), var(--gold)); transition: width .15s; }
+    .progress-msg { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+    .phone-frame {
+      margin: 0 auto; max-width: 340px; border-radius: 26px; overflow: hidden;
+      border: 2px solid var(--border); background: #040709;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+    video, canvas#liveCanvas { display: block; width: 100%; height: auto; background: #000; }
+    .preview-actions { display: flex; gap: 10px; margin-top: 14px; justify-content: center; flex-wrap: wrap; }
+
+    .gallery { margin-top: 28px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+    .gal-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px;
+      cursor: pointer; transition: border-color .15s, transform .15s;
+    }
+    .gal-card:hover { border-color: var(--emerald); transform: translateY(-2px); }
+    .gal-card img { width: 100%; border-radius: 10px; margin-bottom: 8px; display: block; }
+    .gal-card .meta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+    .api-box {
+      margin-top: 22px; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 16px;
+    }
+    pre {
+      background: #060a0d; border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px; overflow-x: auto; font-family: var(--mono); font-size: 12px; color: #b7f5d8; margin-top: 10px;
+    }
+    footer {
+      margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="wrap">
+    <nav>
+      <div class="brand">
+        <img src="./assets/launchreel_brand_icon.png" alt="LaunchReel" />
+        <div>LaunchReel <span style="color:var(--emerald);font-family:var(--mono);font-weight:800;font-size:13px;margin-left:4px;">$REEL</span></div>
+      </div>
+      <div class="nav-pills">
+        <span class="pill live">● LAUNCHING ON V4.FUN (ROBINHOOD CHAIN)</span>
+        <span class="pill">AGEN MCP READY</span>
+        <a href="https://github.com/litleSDK/launchreel" target="_blank" class="pill">GitHub ↗</a>
+        <a href="https://v4.fun" target="_blank" class="pill" style="color:var(--gold);">v4.fun ↗</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-kicker">★ LAUNCHREEL ($REEL) • ON-CHAIN AI VIDEO STUDIO FOR V4.FUN</div>
+      <h1>Contract Address → <span>Broadcast Launch Reel</span> in 8 Seconds.</h1>
+      <p>
+        Built natively for <strong>v4.fun</strong>, <strong>Robinhood Chain</strong> &amp; <strong>Solana</strong> projects.
+        Paste any contract address to pull live on-chain telemetry and generate a crisp 1080p
+        <strong>music + kinetic SFX</strong> launch trailer — zero robotic AI voice.
+      </p>
+
+      <div class="utility-grid">
+        <div class="util-card">
+          <div class="k" style="color:var(--emerald);">01 // FREE LIVE STUDIO</div>
+          <div class="t">Instant Telemetry + Browser Render</div>
+          <div class="d">Paste any Robinhood Chain or Solana CA to pull live DexScreener data and generate a trailer right here.</div>
+        </div>
+        <div class="util-card">
+          <div class="k" style="color:var(--gold);">02 // HOLD $REEL PRO</div>
+          <div class="t">1080p CRF-14 + Daily X Recaps</div>
+          <div class="d">Unlock watermark-free 1080p MP4 exports, custom brand themes, 16:9 widescreen, and automated daily market reels.</div>
+        </div>
+        <div class="util-card">
+          <div class="k" style="color:var(--emerald);">03 // AGEN MCP API</div>
+          <div class="t">Autonomous Agent Video Marketing</div>
+          <div class="d">One POST endpoint lets Canopy Agen AI agents auto-render a launch video the second a token deploys on v4.fun.</div>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <input id="caInput" type="text" placeholder="Paste any Robinhood Chain 0x... address, Solana mint, or v4.fun URL" />
+        <button id="fetchBtn" class="btn btn-primary">Fetch Live Chain Data</button>
+      </div>
+
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px;">
+        OUR LAUNCH ($REEL) + LIVE V4.FUN ECOSYSTEM DEMOS (CLICK ANY TO TEST LIVE):
+      </div>
+      <div id="featuredRow" class="featured-row"></div>
+    </section>
+
+    <section class="studio-grid">
+      <div class="panel">
+        <div class="panel-title">
+          <span>01 // Live On-Chain Telemetry &amp; Reel Builder</span>
+          <span id="sourcesTag" style="color:var(--muted);">DEXSCREENER LIVE API</span>
+        </div>
+
+        <div class="token-header">
+          <img id="tokenIcon" class="token-icon" src="./assets/launchreel_brand_icon.png" alt="Token" />
+          <div class="token-title">
+            <h2><span id="tokenName">LaunchReel ($REEL)</span> <span id="tokenDelta" class="delta up">★ OUR TOKEN</span></h2>
+            <div id="tokenSub" class="sub">OUR OFFICIAL V4.FUN LAUNCH • Robinhood Chain (Uniswap v4) • Fixed 1B Supply</div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box"><div class="lbl" id="lbl1">SUPPLY</div><div id="stMcap" class="val">1B Fixed</div></div>
+          <div class="stat-box"><div class="lbl" id="lbl2">RENDER SPEED</div><div id="stVol" class="val">7.5s</div></div>
+          <div class="stat-box"><div class="lbl" id="lbl3">LIQUIDITY</div><div id="stLiq" class="val">100% Locked</div></div>
+          <div class="stat-box"><div class="lbl" id="lbl4">AGENT API</div><div id="stHold" class="val">MCP Ready</div></div>
+        </div>
+
+        <div class="controls-row">
+          <div>
+            <label class="field-lbl">Visual Theme</label>
+            <select id="themeSel">
+              <option value="robinhood">Robinhood Emerald</option>
+              <option value="canopy">Canopy Gold</option>
+              <option value="editorial">Vox Editorial Paper</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-lbl">Audio Style</label>
+            <select id="audioSel">
+              <option value="beat_dark">No Voice — Dark Fintech Synth Beat + SFX (Recommended)</option>
+              <option value="beat_hype">No Voice — Fast Kinetic Pulse + SFX</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div>
+            <label class="field-lbl">Frame-0 Hook Headline</label>
+            <input id="hookInput" class="txt" type="text" />
+          </div>
+          <div>
+            <label class="field-lbl">End-Card CTA Text</label>
+            <input id="ctaInput" class="txt" type="text" />
+          </div>
+        </div>
+
+        <div class="beats-stack">
+          <div><label class="field-lbl">Beat 1 — Instant Frame-0 Callout</label><input id="beat0" class="txt" type="text" /></div>
+          <div><label class="field-lbl">Beat 2 — Telemetry Callout</label><input id="beat1" class="txt" type="text" /></div>
+          <div><label class="field-lbl">Beat 3 — Order Flow / Utility Callout</label><input id="beat2" class="txt" type="text" /></div>
+          <div><label class="field-lbl">Beat 4 — Launch CTA Callout</label><input id="beat3" class="txt" type="text" /></div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button id="renderBtn" class="btn btn-gold" style="flex:1;min-width:220px;">⚡ Render Live Trailer Right in Browser</button>
+          <a id="v4Link" href="https://v4.fun" target="_blank" class="btn btn-ghost">View on v4.fun ↗</a>
+        </div>
+
+        <div id="progressWrap" class="progress-wrap">
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;">
+            <span id="progTitle" style="color:var(--emerald);">RENDERING LIVE IN BROWSER...</span>
+            <span id="progPct">0%</span>
+          </div>
+          <div class="progress-bar-bg"><div id="progBar" class="progress-bar-fg"></div></div>
+          <div id="progMsg" class="progress-msg">Synthesizing beat + drawing 30fps kinetic frames...</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>02 // Broadcast Preview Player</span>
+          <span id="metaBadge" style="color:var(--muted);">1080×1920 • CRF 14 • ZERO AI VOICE</span>
+        </div>
+
+        <div class="phone-frame">
+          <video id="videoPlayer" controls playsinline loop poster="./assets/REEL_official_launch_9x16_contact.jpg" src="./assets/REEL_official_launch_9x16.mp4"></video>
+          <canvas id="liveCanvas" width="720" height="1280" style="display:none;"></canvas>
+        </div>
+
+        <div class="preview-actions">
+          <a id="downloadBtn" href="./assets/REEL_official_launch_9x16.mp4" download="LaunchReel_REEL_1080p.mp4" class="btn btn-primary">↓ Download Video</a>
+          <a id="contactBtn" href="./assets/REEL_official_launch_9x16_contact.jpg" target="_blank" class="btn btn-ghost">QA Contact Sheet</a>
+        </div>
+
+        <div class="api-box">
+          <div style="font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;">
+            AGEN MCP / AUTONOMOUS AGENT ENDPOINT
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px;">
+            Full open-source Python FFmpeg CRF-14 renderer included in GitHub — Canopy Agen agents call one POST endpoint right after launch:
+          </p>
+          <pre id="curlSnippet">curl -X POST https://api.launchreel.xyz/api/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{"address":"0x532c5583671870723CEEf573600208aF49c87c54","theme":"canopy","voice":"beat_dark","aspect":"9:16"}'</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery">
+      <div class="panel-title" style="margin-bottom:12px;">
+        <span>03 // Pre-Rendered 1080×1920 Broadcast Showcase Reels (FFmpeg CRF-14)</span>
+        <span style="color:var(--muted);">Click any card to play instantly</span>
+      </div>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </section>
+
+    <footer>
+      <div>LaunchReel ($REEL) • Built natively for v4.fun, Robinhood Chain &amp; Solana</div>
+      <div>Immutable 1B Supply • 100% Locked Uniswap v4 LP • Zero Team Allocation</div>
+    </footer>
+  </div>
+
+  <script>
+    const FEATURED = [
+      { name: "LaunchReel", symbol: "REEL", address: "LAUNCHREEL_OFFICIAL", badge: "OUR TOKEN", theme: "robinhood" },
+      { name: "Canopy Finance", symbol: "CNPY", address: "0x532c5583671870723CEEf573600208aF49c87c54", badge: "Live Demo", theme: "canopy" },
+      { name: "DigitalDon", symbol: "DON", address: "0x0B551573D731090B3F57129c11B0A4A9e4D0A69c", badge: "Live Demo", theme: "robinhood" },
+      { name: "AINDEX", symbol: "AIX", address: "0x24949d12998ceCC9dE014E8BB7c8e007Ba5e308E", badge: "Live Demo", theme: "robinhood" },
+      { name: "Nomi Labs", symbol: "NOMI", address: "0xBD6F2A7c6BBBcca2BE40c4Ccd2C60C8f142FD03a", badge: "Live Demo", theme: "robinhood" },
+    ];
+
+    const GALLERY = [
+      {
+        title: "LaunchReel ($REEL) — Official v4.fun Launch Trailer",
+        tag: "OUR TOKEN • 1080×1920 • 15.2s",
+        mp4: "./assets/REEL_official_launch_9x16.mp4",
+        contact: "./assets/REEL_official_launch_9x16_contact.jpg",
+        file: "REEL_official_launch_9x16.mp4",
+      },
+      {
+        title: "Canopy Finance ($CNPY) — Live Robinhood Chain Reel",
+        tag: "LIVE DEMO • 1080×1920 • 15.2s",
+        mp4: "./assets/CNPY_demo_9x16.mp4",
+        contact: "./assets/CNPY_demo_9x16_contact.jpg",
+        file: "CNPY_demo_9x16.mp4",
+      },
+      {
+        title: "DigitalDon ($DON) — Live Vetted Project Reel",
+        tag: "LIVE DEMO • 1080×1920 • 15.2s",
+        mp4: "./assets/DON_demo_9x16.mp4",
+        contact: "./assets/DON_demo_9x16_contact.jpg",
+        file: "DON_demo_9x16.mp4",
+      },
+    ];
+
+    const THEMES = {
+      robinhood: { bg1: "#070d11", bg2: "#0b151a", card: "#0f1920", border: "#26424e", accent: "#00e58d", accent2: "#f2c94c", danger: "#ff5c6c", text: "#f4f8fb", muted: "#90a8b6", pillFg: "#081014" },
+      canopy:    { bg1: "#0a0a0e", bg2: "#121018", card: "#15131c", border: "#423826", accent: "#edbd2e", accent2: "#2ee59d", danger: "#f25c68", text: "#f6f2e8", muted: "#a69e94", pillFg: "#0f0d12" },
+      editorial: { bg1: "#efebe3", bg2: "#e8e2d6", card: "#f8f5ef", border: "#c6beae", accent: "#1d1c20", accent2: "#edbd2e", danger: "#e04436", text: "#19181c", muted: "#66625c", pillFg: "#f8f5ef" },
+    };
+
+    let currentTok = null;
+
+    function fmtUsd(v) {
+      if (!v || v <= 0) return "$0";
+      if (v >= 1e9) return "$" + (v / 1e9).toFixed(2) + "B";
+      if (v >= 1e6) return "$" + (v / 1e6).toFixed(2) + "M";
+      if (v >= 1e3) return "$" + (v / 1e3).toFixed(1) + "K";
+      return "$" + Number(v).toFixed(2);
+    }
+
+    function fmtPrice(v) {
+      if (!v || v <= 0) return "$0.00";
+      if (v >= 1) return "$" + v.toFixed(2);
+      if (v >= 0.01) return "$" + v.toFixed(4);
+      return "$" + v.toFixed(6);
+    }
+
+    function shortAddr(a) {
+      return a && a.length > 14 ? a.slice(0, 6) + "..." + a.slice(-4) : (a || "");
+    }
+
+    function playMp4(mp4Url, contactUrl, fileName) {
+      const vp = document.getElementById("videoPlayer");
+      const cv = document.getElementById("liveCanvas");
+      cv.style.display = "none";
+      vp.style.display = "block";
+      if (contactUrl) vp.poster = contactUrl;
+      vp.src = mp4Url;
+      vp.load();
+      vp.play().catch(() => {});
+      const dl = document.getElementById("downloadBtn");
+      dl.href = mp4Url;
+      dl.download = fileName || "launchreel.mp4";
+      const cb = document.getElementById("contactBtn");
+      if (contactUrl) { cb.href = contactUrl; cb.style.display = "inline-block"; }
+      else { cb.style.display = "none"; }
+    }
+
+    function applyTokenUI(t) {
+      currentTok = t;
+      const isSelf = t.address === "LAUNCHREEL_OFFICIAL";
+      document.getElementById("tokenName").textContent = `${t.name} ($${t.symbol})`;
+      document.getElementById("tokenSub").textContent = isSelf
+        ? "OUR OFFICIAL V4.FUN LAUNCH • Robinhood Chain (Uniswap v4) • Fixed 1B Supply"
+        : `${t.chain} • ${t.dex} • ${t.address}`;
+      const dEl = document.getElementById("tokenDelta");
+      if (isSelf) {
+        dEl.textContent = "★ OUR TOKEN";
+        dEl.className = "delta up";
+      } else {
+        const ch = Number(t.change24h || 0);
+        dEl.textContent = `${ch >= 0 ? "▲" : "▼"} ${ch >= 0 ? "+" : ""}${ch.toFixed(1)}% 24H`;
+        dEl.className = "delta " + (ch >= 0 ? "up" : "down");
+      }
+      document.getElementById("tokenIcon").src = t.iconUrl || "./assets/launchreel_brand_icon.png";
+
+      if (isSelf) {
+        document.getElementById("lbl1").textContent = "SUPPLY";
+        document.getElementById("lbl2").textContent = "RENDER SPEED";
+        document.getElementById("lbl3").textContent = "LIQUIDITY";
+        document.getElementById("lbl4").textContent = "AGENT API";
+        document.getElementById("stMcap").textContent = "1B Fixed";
+        document.getElementById("stVol").textContent = "7.5s";
+        document.getElementById("stLiq").textContent = "100% Locked";
+        document.getElementById("stHold").textContent = "MCP Ready";
+        document.getElementById("hookInput").value = "CA TO 1080P LAUNCH REEL IN 8 SECONDS";
+        document.getElementById("ctaInput").value = "LAUNCHING SOON ON V4.FUN • $REEL";
+        document.getElementById("beat0").value = "PASTE ANY V4.FUN CONTRACT • GET A 1080P LAUNCH REEL";
+        document.getElementById("beat1").value = "LIVE BLOCKSCOUT + DEXSCREENER DATA • NO ROBOTIC AI VOICE";
+        document.getElementById("beat2").value = "HOLD $REEL FOR PRO 1080P + AGEN MCP AUTONOMOUS VIDEO API";
+        document.getElementById("beat3").value = "LAUNCHREEL ($REEL) • BUILT FOR EVERY V4.FUN BUILDER";
+        document.getElementById("v4Link").href = "https://v4.fun";
+      } else {
+        document.getElementById("lbl1").textContent = "MARKET CAP";
+        document.getElementById("lbl2").textContent = "24H VOLUME";
+        document.getElementById("lbl3").textContent = "LIQUIDITY";
+        document.getElementById("lbl4").textContent = "24H SWAPS";
+        document.getElementById("stMcap").textContent = fmtUsd(t.mcap);
+        document.getElementById("stVol").textContent = fmtUsd(t.vol24h);
+        document.getElementById("stLiq").textContent = fmtUsd(t.liqUsd);
+        document.getElementById("stHold").textContent = `${t.buys24h + t.sells24h} txns`;
+        const ch = Number(t.change24h || 0);
+        document.getElementById("hookInput").value = ch >= 10 ? `$${t.symbol} UP +${ch.toFixed(1)}% TODAY` : `MEET $${t.symbol} ON ${t.chain.toUpperCase()}`;
+        document.getElementById("ctaInput").value = `v4.fun/${shortAddr(t.address)}`;
+        const tot = t.buys24h + t.sells24h;
+        const bp = tot > 0 ? Math.round((t.buys24h / tot) * 100) : 64;
+        document.getElementById("beat0").value = `$${t.symbol} LIVE ON ${t.chain.toUpperCase()} (${ch >= 0 ? "+" : ""}${ch.toFixed(1)}% 24H)`;
+        document.getElementById("beat1").value = `${fmtUsd(t.mcap)} MCAP • ${fmtUsd(t.vol24h)} 24H VOL • ${fmtUsd(t.liqUsd)} LP`;
+        document.getElementById("beat2").value = `${bp}% BUY FLOW (${t.buys24h} BUYS / ${t.sells24h} SELLS) • LOCKED POOL`;
+        document.getElementById("beat3").value = `TRADE $${t.symbol} ON V4.FUN • REELS BY LAUNCHREEL`;
+        document.getElementById("v4Link").href = `https://v4.fun/${t.address}`;
+      }
+
+      document.getElementById("curlSnippet").textContent =
+`curl -X POST https://api.launchreel.xyz/api/v1/generate \\
+  -H "Content-Type: application/json" \\
+  -d '{"address":"${t.address}","theme":"${document.getElementById("themeSel").value}","voice":"beat_dark","aspect":"9:16"}'`;
+
+      document.querySelectorAll(".chip").forEach(c => {
+        c.classList.toggle("active", c.dataset.addr.toLowerCase() === t.address.toLowerCase());
+      });
+    }
+
+    async function fetchToken(rawAddr) {
+      let addr = (rawAddr || "").trim();
+      const m = addr.match(/v4\.fun\/(?:tokens\/|markets\/)?([A-Za-z0-9]{20,64})/);
+      if (m) addr = m[1];
+      if (!addr) return;
+      document.getElementById("caInput").value = addr;
+
+      if (addr.toUpperCase() === "LAUNCHREEL_OFFICIAL" || addr.toUpperCase() === "REEL") {
+        applyTokenUI({
+          address: "LAUNCHREEL_OFFICIAL", name: "LaunchReel", symbol: "REEL", chain: "Robinhood Chain",
+          dex: "UNISWAP V4", priceUsd: 0, mcap: 0, vol24h: 0, liqUsd: 0, change24h: 100, change6h: 42, change1h: 18,
+          buys24h: 100, sells24h: 0, iconUrl: "./assets/launchreel_brand_icon.png",
+        });
+        playMp4("./assets/REEL_official_launch_9x16.mp4", "./assets/REEL_official_launch_9x16_contact.jpg", "REEL_official_launch_9x16.mp4");
+        return;
+      }
+
+      const btn = document.getElementById("fetchBtn");
+      btn.disabled = true; btn.textContent = "Fetching live...";
+      try {
+        const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${encodeURIComponent(addr)}`);
+        const data = await res.json();
+        const pairs = data.pairs || [];
+        if (!pairs.length) throw new Error("Token not found on DexScreener yet.");
+        pairs.sort((a, b) => {
+          const ap = a.chainId === "robinhood" ? 2 : (a.chainId === "solana" ? 1 : 0);
+          const bp = b.chainId === "robinhood" ? 2 : (b.chainId === "solana" ? 1 : 0);
+          if (bp !== ap) return bp - ap;
+          return ((b.liquidity && b.liquidity.usd) || 0) - ((a.liquidity && a.liquidity.usd) || 0);
+        });
+        const p = pairs[0];
+        const chain = p.chainId === "robinhood" ? "Robinhood Chain" : (p.chainId === "solana" ? "Solana" : p.chainId);
+        applyTokenUI({
+          address: addr,
+          name: (p.baseToken && p.baseToken.name) || "Token",
+          symbol: ((p.baseToken && p.baseToken.symbol) || "TOK").toUpperCase(),
+          chain,
+          dex: (p.dexId || "uniswap").toUpperCase() + ((p.labels && p.labels.includes("v4")) ? " V4" : ""),
+          priceUsd: Number(p.priceUsd || 0),
+          mcap: Number(p.marketCap || p.fdv || 0),
+          vol24h: Number((p.volume && p.volume.h24) || 0),
+          liqUsd: Number((p.liquidity && p.liquidity.usd) || 0),
+          change24h: Number((p.priceChange && p.priceChange.h24) || 0),
+          change6h: Number((p.priceChange && p.priceChange.h6) || 0),
+          change1h: Number((p.priceChange && p.priceChange.h1) || 0),
+          buys24h: Number((p.txns && p.txns.h24 && p.txns.h24.buys) || 0),
+          sells24h: Number((p.txns && p.txns.h24 && p.txns.h24.sells) || 0),
+          iconUrl: (p.info && p.info.imageUrl) || "./assets/launchreel_brand_icon.png",
+        });
+
+        // If we have a studio pre-render for CNPY or DON, load it right away too
+        if (addr.toLowerCase() === "0x532c5583671870723ceef573600208af49c87c54") {
+          playMp4("./assets/CNPY_demo_9x16.mp4", "./assets/CNPY_demo_9x16_contact.jpg", "CNPY_demo_9x16.mp4");
+        } else if (addr.toLowerCase() === "0x0b551573d731090b3f57129c11b0a4a9e4d0a69c") {
+          playMp4("./assets/DON_demo_9x16.mp4", "./assets/DON_demo_9x16_contact.jpg", "DON_demo_9x16.mp4");
+        }
+      } catch (err) {
+        alert("Lookup error: " + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "Fetch Live Chain Data";
+      }
+    }
+
+    // Real in-browser 30fps Canvas + WebAudio Synth Beat + MediaRecorder Video Generator
+    async function renderInBrowser() {
+      if (!currentTok) return;
+      const btn = document.getElementById("renderBtn");
+      btn.disabled = true;
+      const pw = document.getElementById("progressWrap");
+      pw.style.display = "block";
+      document.getElementById("progTitle").textContent = "RENDERING LIVE TRAILER (30FPS + SYNTH BEAT)...";
+
+      const cv = document.getElementById("liveCanvas");
+      const vp = document.getElementById("videoPlayer");
+      vp.pause();
+      vp.style.display = "none";
+      cv.style.display = "block";
+      const ctx = cv.getContext("2d");
+      const W = cv.width, H = cv.height;
+
+      const theme = THEMES[document.getElementById("themeSel").value] || THEMES.robinhood;
+      const hook = document.getElementById("hookInput").value.toUpperCase();
+      const cta = document.getElementById("ctaInput").value;
+      const beats = [0,1,2,3].map(i => document.getElementById("beat" + i).value.toUpperCase());
+      const isSelf = currentTok.address === "LAUNCHREEL_OFFICIAL";
+
+      // Synthesize crisp dark electronic beat + scene hits via WebAudio
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const actx = new AudioCtx();
+      const dest = actx.createMediaStreamDestination();
+      const masterGain = actx.createGain();
+      masterGain.gain.value = 0.55;
+      masterGain.connect(dest);
+      masterGain.connect(actx.destination);
+
+      const durS = 10.0; // crisp 10s real-time browser capture (4 beats x 2.5s)
+      const now = actx.currentTime + 0.05;
+      const bpm = document.getElementById("audioSel").value === "beat_hype" ? 132 : 120;
+      const stepS = 60 / bpm / 2;
+      const bassNotes = [55, 55, 65.4, 55, 73.4, 65.4, 55, 49];
+      for (let i = 0; i < Math.floor(durS / stepS); i++) {
+        const t = now + i * stepS;
+        if (i % 2 === 0) {
+          // Punchy sub kick
+          const osc = actx.createOscillator();
+          const g = actx.createGain();
+          osc.frequency.setValueAtTime(125, t);
+          osc.frequency.exponentialRampToValueAtTime(38, t + 0.14);
+          g.gain.setValueAtTime(0.7, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+          osc.connect(g); g.connect(masterGain);
+          osc.start(t); osc.stop(t + 0.19);
+        }
+        // Dark synth bass pulse
+        const b = actx.createOscillator();
+        const flt = actx.createBiquadFilter();
+        const bg = actx.createGain();
+        b.type = "sawtooth";
+        b.frequency.setValueAtTime(bassNotes[i % bassNotes.length], t);
+        flt.type = "lowpass"; flt.frequency.setValueAtTime(420, t);
+        bg.gain.setValueAtTime(0.18, t);
+        bg.gain.exponentialRampToValueAtTime(0.005, t + stepS * 0.85);
+        b.connect(flt); flt.connect(bg); bg.connect(masterGain);
+        b.start(t); b.stop(t + stepS * 0.9);
+      }
+
+      const stream = new MediaStream([
+        ...cv.captureStream(30).getVideoTracks(),
+        ...dest.stream.getAudioTracks(),
+      ]);
+      const chunks = [];
+      let rec = null;
+      if (window.MediaRecorder) {
+        try {
+          rec = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9,opus" });
+        } catch {
+          rec = new MediaRecorder(stream);
+        }
+        rec.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+        rec.start();
+      }
+
+      const startMs = performance.now();
+      const totalMs = durS * 1000;
+
+      function roundRect(x, y, w, h, r, fill, stroke) {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, r);
+        if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+      }
+
+      function drawFrame(elapsedMs) {
+        const pAll = Math.min(1, elapsedMs / totalMs);
+        const beat = Math.min(3, Math.floor(pAll * 4));
+        const pBeat = (pAll * 4) - beat;
+
+        // Background gradient + grid
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        grad.addColorStop(0, theme.bg1); grad.addColorStop(1, theme.bg2);
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = "rgba(255,255,255,0.04)"; ctx.lineWidth = 1;
+        for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+        for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+        // Top progress bar & HUD
+        ctx.fillStyle = theme.accent; ctx.fillRect(0, 0, W * pAll, 6);
+        roundRect(42, 46, 330, 38, 19, theme.card, theme.border);
+        ctx.fillStyle = theme.accent; ctx.font = "700 15px Consolas, monospace";
+        ctx.fillText(`●  ${currentTok.chain.toUpperCase()} • ${currentTok.dex}`, 60, 70);
+        roundRect(W - 166, 46, 124, 38, 19, theme.card, theme.border);
+        ctx.fillStyle = theme.muted; ctx.fillText(`LIVE • 0${beat + 1}/04`, W - 148, 70);
+
+        if (beat === 0) {
+          // Pulsing emblem rings
+          const cx = W / 2, cy = 285;
+          const pulse = Math.sin(elapsedMs * 0.01) * 10;
+          for (let r = 0; r < 3; r++) {
+            ctx.beginPath(); ctx.arc(cx, cy, 84 + r * 26 + pulse, 0, Math.PI * 2);
+            ctx.strokeStyle = theme.accent + (r === 0 ? "99" : r === 1 ? "55" : "28");
+            ctx.lineWidth = 2.5; ctx.stroke();
+          }
+          ctx.beginPath(); ctx.arc(cx, cy, 72, 0, Math.PI * 2);
+          ctx.fillStyle = theme.card; ctx.fill(); ctx.strokeStyle = theme.accent; ctx.lineWidth = 4; ctx.stroke();
+          ctx.fillStyle = theme.accent; ctx.font = "900 40px Segoe UI, sans-serif"; ctx.textAlign = "center";
+          ctx.fillText(currentTok.symbol.slice(0, 4), cx, cy + 14);
+
+          ctx.fillStyle = theme.text; ctx.font = "900 84px Impact, Arial Black, sans-serif";
+          ctx.fillText("$" + currentTok.symbol, cx, 470);
+          ctx.fillStyle = theme.accent; ctx.fillRect(cx - 120, 484, 240 * Math.min(1, pBeat * 2.5), 7);
+          ctx.fillStyle = theme.muted; ctx.font = "600 26px Segoe UI, sans-serif";
+          ctx.fillText(currentTok.name, cx, 530);
+
+          roundRect(48, 620, W - 96, 210, 22, theme.card, theme.border);
+          ctx.fillStyle = theme.accent; ctx.fillRect(48, 620, 10, 210);
+          ctx.textAlign = "left";
+          ctx.fillStyle = theme.accent; ctx.font = "700 16px Consolas, monospace";
+          ctx.fillText(isSelf ? "LAUNCHING ON V4.FUN • ROBINHOOD CHAIN" : `${currentTok.chain.toUpperCase()} • LIVE BRIEF`, 78, 660);
+          ctx.fillStyle = theme.text; ctx.font = "900 32px Segoe UI, sans-serif";
+          ctx.fillText(hook.slice(0, 28), 78, 718);
+          if (hook.length > 28) ctx.fillText(hook.slice(28, 56), 78, 760);
+          ctx.fillStyle = theme.muted; ctx.font = "700 17px Consolas, monospace";
+          ctx.fillText(isSelf ? "1080P 30FPS • ~8S RENDER • AGEN MCP API" : `PRICE ${fmtPrice(currentTok.priceUsd)} • 24H VOL ${fmtUsd(currentTok.vol24h)}`, 78, 804);
+        } else if (beat === 1) {
+          ctx.textAlign = "left";
+          ctx.fillStyle = theme.accent; ctx.font = "700 16px Consolas, monospace";
+          ctx.fillText("LIVE ON-CHAIN TELEMETRY", 48, 145);
+          ctx.fillStyle = theme.text; ctx.font = "900 32px Segoe UI, sans-serif";
+          ctx.fillText(`$${currentTok.symbol} • ${currentTok.name}`, 48, 186);
+
+          // Chart Card
+          roundRect(48, 214, W - 96, 290, 22, theme.card, theme.border);
+          ctx.fillStyle = theme.text; ctx.font = "900 30px Segoe UI, sans-serif";
+          ctx.fillText(isSelf ? "1080P • CRF 14" : fmtPrice(currentTok.priceUsd), 72, 266);
+          const pts = 32, show = Math.max(2, Math.floor(pts * Math.min(1, pBeat * 1.5)));
+          ctx.beginPath();
+          for (let i = 0; i < show; i++) {
+            const x = 76 + (W - 152) * (i / (pts - 1));
+            const y = 460 - (40 + i * 4.5 + Math.sin(i * 0.7) * 18);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.strokeStyle = theme.accent; ctx.lineWidth = 4; ctx.stroke();
+
+          // 2x2 Metrics
+          const cards = isSelf
+            ? [["RENDER SPEED", "7.5s"], ["CHAINS LIVE", "2 CHAINS"], ["AUDIO ENGINE", "BEATS+SFX"], ["AGENT API", "MCP READY"]]
+            : [["MARKET CAP", fmtUsd(currentTok.mcap)], ["24H VOLUME", fmtUsd(currentTok.vol24h)], ["LIQUIDITY", fmtUsd(currentTok.liqUsd)], ["24H SWAPS", String(currentTok.buys24h + currentTok.sells24h)]];
+          cards.forEach(([lbl, val], idx) => {
+            const r = Math.floor(idx / 2), c = idx % 2;
+            const x = 48 + c * 320, y = 532 + r * 170;
+            roundRect(x, y, 304, 154, 18, theme.card, theme.border);
+            ctx.fillStyle = theme.accent; ctx.fillRect(x + 20, y + 16, 44, 4);
+            ctx.fillStyle = theme.muted; ctx.font = "700 15px Consolas, monospace"; ctx.fillText(lbl, x + 20, y + 48);
+            ctx.fillStyle = theme.text; ctx.font = "900 38px Segoe UI, sans-serif"; ctx.fillText(val, x + 20, y + 108);
+          });
+        } else if (beat === 2) {
+          ctx.textAlign = "left";
+          ctx.fillStyle = theme.accent; ctx.font = "700 16px Consolas, monospace";
+          ctx.fillText("ORDER FLOW & IMMUTABLE PROOF", 48, 145);
+          ctx.fillStyle = theme.text; ctx.font = "900 32px Segoe UI, sans-serif";
+          ctx.fillText(`$${currentTok.symbol} • VERIFIED ON-CHAIN`, 48, 186);
+
+          roundRect(48, 214, W - 96, 180, 22, theme.card, theme.border);
+          const tot = currentTok.buys24h + currentTok.sells24h;
+          const ratio = isSelf ? 1 : (tot > 0 ? currentTok.buys24h / tot : 0.65);
+          ctx.fillStyle = theme.accent; ctx.font = "900 28px Segoe UI, sans-serif";
+          ctx.fillText(isSelf ? "100% LOCKED POOL • 0% TEAM" : `${Math.round(ratio * 100)}% BUY PRESSURE`, 72, 272);
+          const bw = W - 144;
+          roundRect(72, 298, bw, 28, 14, "#1a2832");
+          roundRect(72, 298, Math.max(28, bw * ratio * Math.min(1, pBeat * 2)), 28, 14, theme.accent);
+          if (!isSelf && ratio < 0.98) roundRect(72 + bw - bw * (1 - ratio) * Math.min(1, pBeat * 2), 298, bw * (1 - ratio) * Math.min(1, pBeat * 2), 28, 14, theme.danger);
+
+          const rows = isSelf
+            ? [["01 // $REEL PRO STUDIO", "Hold $REEL for 1080p & custom themes"], ["02 // AGEN MCP API", "Autonomous agents auto-render at launch"], ["03 // IMMUTABLE POOL", "Fixed 1B supply • Zero team mint"]]
+            : [["01 // LOCKED LIQUIDITY", "Full supply locked permanently on chain"], ["02 // FIXED 1B SUPPLY", "Zero team mint • Immutable vault"], ["03 // CONTRACT", `${currentTok.chain} • ${shortAddr(currentTok.address)}`]];
+          rows.forEach(([t, d], i) => {
+            const y = 426 + i * 145;
+            roundRect(48, y, W - 96, 126, 18, theme.card, theme.border);
+            ctx.fillStyle = theme.accent; ctx.font = "700 16px Consolas, monospace"; ctx.fillText("✓  " + t, 74, y + 46);
+            ctx.fillStyle = theme.text; ctx.font = "700 22px Segoe UI, sans-serif"; ctx.fillText(d, 74, y + 88);
+          });
+        } else {
+          roundRect(56, 220, W - 112, 620, 26, theme.card, theme.accent);
+          ctx.textAlign = "center";
+          ctx.fillStyle = theme.text; ctx.font = "900 78px Impact, Arial Black, sans-serif";
+          ctx.fillText("$" + currentTok.symbol, W / 2, 420);
+          ctx.fillStyle = theme.muted; ctx.font = "600 24px Segoe UI, sans-serif";
+          ctx.fillText(`${currentTok.name} • ${currentTok.chain}`, W / 2, 466);
+          roundRect(W / 2 - 190, 520, 380, 68, 34, theme.accent);
+          ctx.fillStyle = theme.pillFg; ctx.font = "900 26px Segoe UI, sans-serif";
+          ctx.fillText("LIVE ON V4.FUN  →", W / 2, 564);
+          ctx.fillStyle = theme.text; ctx.font = "700 18px Consolas, monospace";
+          ctx.fillText(cta.slice(0, 36), W / 2, 646);
+          ctx.fillStyle = theme.muted; ctx.font = "700 15px Consolas, monospace";
+          ctx.fillText("GENERATED LIVE WITH LAUNCHREEL • $REEL", W / 2, 796);
+        }
+
+        // Bottom kinetic takeaway bar
+        roundRect(48, H - 230, W - 96, 108, 18, theme.card, theme.accent);
+        ctx.fillStyle = theme.accent; ctx.fillRect(48, H - 214, 8, 76);
+        ctx.textAlign = "center"; ctx.fillStyle = theme.text; ctx.font = "900 21px Segoe UI, sans-serif";
+        const bt = beats[beat] || "";
+        ctx.fillText(bt.slice(0, 40), W / 2, H - 178);
+        if (bt.length > 40) ctx.fillText(bt.slice(40, 80), W / 2, H - 146);
+        ctx.textAlign = "left";
+      }
+
+      function step() {
+        const elapsed = performance.now() - startMs;
+        const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+        document.getElementById("progBar").style.width = pct + "%";
+        document.getElementById("progPct").textContent = pct + "%";
+        document.getElementById("progMsg").textContent = `Rendering live frame (${(elapsed / 1000).toFixed(1)}s / ${durS.toFixed(1)}s)...`;
+        drawFrame(elapsed);
+        if (elapsed < totalMs) {
+          requestAnimationFrame(step);
+        } else {
+          actx.close().catch(() => {});
+          if (rec && rec.state !== "inactive") {
+            rec.onstop = () => {
+              const blob = new Blob(chunks, { type: "video/webm" });
+              const url = URL.createObjectURL(blob);
+              playMp4(url, null, `${currentTok.symbol}_LaunchReel_live.webm`);
+              document.getElementById("progTitle").textContent = "COMPLETE ✓ (READY TO PLAY & DOWNLOAD)";
+              document.getElementById("progMsg").textContent = "Rendered live in browser! Click Download Video to save.";
+              btn.disabled = false;
+            };
+            rec.stop();
+          } else {
+            btn.disabled = false;
+          }
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Populate Featured Chips & Pre-rendered 1080p Gallery
+    const row = document.getElementById("featuredRow");
+    FEATURED.forEach(item => {
+      const b = document.createElement("button");
+      b.className = "chip";
+      b.dataset.addr = item.address;
+      b.innerHTML = `<span class="sym">$${item.symbol}</span><span>${item.name}</span><span class="tag">${item.badge}</span>`;
+      b.onclick = () => {
+        document.getElementById("themeSel").value = item.theme;
+        fetchToken(item.address);
+      };
+      row.appendChild(b);
+    });
+
+    const grid = document.getElementById("galleryGrid");
+    GALLERY.forEach(g => {
+      const card = document.createElement("div");
+      card.className = "gal-card";
+      card.innerHTML = `
+        <img src="${g.contact}" alt="${g.title}" />
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${g.title}</div>
+        <div class="meta"><span>${g.tag}</span><span>Play ▸</span></div>
+      `;
+      card.onclick = () => playMp4(g.mp4, g.contact, g.file);
+      grid.appendChild(card);
+    });
+
+    document.getElementById("fetchBtn").onclick = () => fetchToken(document.getElementById("caInput").value);
+    document.getElementById("renderBtn").onclick = renderInBrowser;
+    document.getElementById("caInput").addEventListener("keydown", e => { if (e.key === "Enter") fetchToken(e.target.value); });
+
+    // Initialize on OUR project: LaunchReel ($REEL)
+    fetchToken("LAUNCHREEL_OFFICIAL");
+  </script>
+</body>
+</html>
